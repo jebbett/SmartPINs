@@ -1,0 +1,157 @@
+definition(
+    name: "SmartPINs",
+    namespace: "jebbett",
+    author: "Jake Tebbett",
+    description: "Smart PIN entry for SmartTiles",
+    category: "My Apps",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
+    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+
+
+preferences {
+    page name: "mainPage", install: true, uninstall: true
+}
+
+def installed() {
+    initialize()
+}
+
+
+
+def updated() {
+    log.debug "Updated with settings: ${settings}"
+    unsubscribe()
+    initialize()
+}
+
+def initialize() {
+    subscribe(b0, "switch.on", triggerB0)
+    subscribe(b1, "switch.on", triggerB1)
+    subscribe(b2, "switch.on", triggerB2)
+    subscribe(b3, "switch.on", triggerB3)
+    subscribe(b4, "switch.on", triggerB4)
+    subscribe(b5, "switch.on", triggerB5)
+    subscribe(b6, "switch.on", triggerB6)
+    subscribe(b7, "switch.on", triggerB7)
+    subscribe(b8, "switch.on", triggerB8)
+    subscribe(b9, "switch.on", triggerB9)
+    subscribe(b_Clear, "switch", triggerBC)
+    state.pinValue = "P"
+    log.debug "Installed with settings: ${settings}"
+}
+
+
+def mainPage() {
+        
+    dynamicPage(name: "mainPage", uninstall: true, install: true) {
+        
+	section("Buttons") {
+            input "b0", "capability.switch", title:"0", multiple: false, required: false
+            input "b1", "capability.switch", title:"1", multiple: false, required: false
+            input "b2", "capability.switch", title:"2", multiple: false, required: false
+            input "b3", "capability.switch", title:"3", multiple: false, required: false
+            input "b4", "capability.switch", title:"4", multiple: false, required: false
+            input "b5", "capability.switch", title:"5", multiple: false, required: false
+            input "b6", "capability.switch", title:"6", multiple: false, required: false
+            input "b7", "capability.switch", title:"7", multiple: false, required: false
+            input "b8", "capability.switch", title:"8", multiple: false, required: false
+            input "b9", "capability.switch", title:"9", multiple: false, required: false
+            input "b_Clear", "capability.switch", title:"Momentary switch on Play", multiple: false, required: false            
+        }
+
+section("Trigger") {
+            input "triggerSW", "capability.switch", title:"Switch to trigger on correct PIN", multiple: false, required: false            
+        }
+
+section("PIN") {
+            input(name: "pinNum", type: "text", title: "PIN to trigger switch", required:false)
+        }
+        section(title: "Debug Logging") {
+       		paragraph "If you experiencing issues please enable logging to help troubleshoot"
+            input "debugLogging", "bool", title: "Debug Logging...", required: false, defaultValue: false, refreshAfterSelection: true
+            	
+            if (debugLogging) { 
+            	state.debugLogging = true 
+                logWriter("Debug Logging has been ${state.debugLogging.toString().toUpperCase()}")
+                paragraph "Debug Logging is Enabled: ${state.debugLogging}"
+            }
+            else { 
+            	state.debugLogging = false 
+            	logWriter("Debug Logging has been ${state.debugLogging.toString().toUpperCase()}")    
+            }
+    	}
+
+    }
+}
+
+
+def triggerB0(evt) {
+    updatePIN(0)
+}
+def triggerB1(evt) {
+    updatePIN(0)
+}
+def triggerB2(evt) {
+    updatePIN(0)
+}
+def triggerB3(evt) {
+    updatePIN(0)
+}
+def triggerB4(evt) {
+    updatePIN(0)
+}
+def triggerB5(evt) {
+    updatePIN(0)
+}
+def triggerB6(evt) {
+    updatePIN(0)
+}
+def triggerB7(evt) {
+    updatePIN(0)
+}
+def triggerB8(evt) {
+    updatePIN(0)
+}
+def triggerB9(evt) {
+    updatePIN(0)
+}
+def triggerBC(evt) {
+    resetPIN()
+}
+
+
+def updatePIN (numVal) {
+   
+    if (state.pinValue == null) {
+			resetPIN()
+            }
+            else
+            {
+            state.pinValue = state.pinValue + numVal
+            }
+
+def myPin = "P${pinNum}"
+def yourPin = state.pinValue
+
+logWriter ("My PIN is $myPin")
+logWriter ("Your PIN is $yourPin")
+
+runIn(5, resetPIN, [overwrite: true])
+if (myPin == yourPin){
+    settings."triggerSW"?.on()
+    resetPIN()
+logWriter ("UNLOCKED")
+}
+}
+
+def resetPIN () {
+state.pinValue = "P"
+logWriter ("PIN Reset")
+}
+
+private def logWriter(value) {
+	if (state.debugLogging) {
+        log.debug "${value}"
+    }	
+}
