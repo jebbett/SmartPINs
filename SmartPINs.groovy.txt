@@ -17,6 +17,7 @@
  *
  *  v0.1 - Quickly pulled together PIN eentry mechanism using virtual switches
  *  v0.2 - Added dual PINs and triggers
+ *  v0.3 - Fixed major error, added routines and custom seconds before reset
  *
  */
 
@@ -69,8 +70,19 @@ def initialize() {
 def mainPage() {
         
     dynamicPage(name: "mainPage", uninstall: true, install: true) {
-        
-	section("Buttons") {
+	section() {
+		paragraph "Using virtual momentary switches, this app will allow you to enter up to 2 PINs to trigger a switch or routine"
+	}
+    
+    //Get defined routines
+	def actions = location.helloHome?.getPhrases()*.label
+		if (actions) {
+			actions.sort()
+		}
+    
+    
+    
+	section(title: "Buttons", hidden: true, hideable: true) {
             input "b0", "capability.switch", title:"0", multiple: false, required: false
             input "b1", "capability.switch", title:"1", multiple: false, required: false
             input "b2", "capability.switch", title:"2", multiple: false, required: false
@@ -84,16 +96,25 @@ def mainPage() {
             input "b_Clear", "capability.switch", title:"Cancel Button", multiple: false, required: false            
         }
 
-section("Trigger") {
-            input "triggerSW", "capability.switch", title:"Switch to trigger on correct PIN 1", multiple: false, required: false
-            input "triggerSW2", "capability.switch", title:"Switch to trigger on correct PIN 2", multiple: false, required: false
+	section(title: "Triggers", hidden: true, hideable: true) {
+            input "triggerSW", "capability.switch", title:"Switch - Correct PIN 1", multiple: false, required: false
+            input "triggerSW2", "capability.switch", title:"Switch - Correct PIN 2", multiple: false, required: false
+            if (actions) {
+				input "routine1", "enum", title: "Routine - Correct PIN 1", required:false, options: actions
+				input "routine2", "enum", title: "Routine - Correct PIN 2", required:false, options: actions
+			}
         }
 
-section("PIN") {
+	section(title: "PINs", hidden: true, hideable: true) {
             input(name: "pinNum", type: "text", title: "PIN 1 to trigger switch", required:false)
             input(name: "pinNum2", type: "text", title: "PIN 2 to trigger switch", required:false)
         }
-        section(title: "Debug Logging") {
+        
+    section(title: "Additional Settings", hidden: true, hideable: true) {
+        	input(name: "pSecs", type: "number", defaultValue: "5", title: "Number of seconds before PIN entry resets", required:false)
+        }
+        
+        section(title: "Debug Logging", hidden: true, hideable: true) {
        		paragraph "If you experiencing issues please enable logging to help troubleshoot"
             input "debugLogging", "bool", title: "Debug Logging...", required: false, defaultValue: false, refreshAfterSelection: true
             	
@@ -116,31 +137,31 @@ def triggerB0(evt) {
     updatePIN(0)
 }
 def triggerB1(evt) {
-    updatePIN(0)
+    updatePIN(1)
 }
 def triggerB2(evt) {
-    updatePIN(0)
+    updatePIN(2)
 }
 def triggerB3(evt) {
-    updatePIN(0)
+    updatePIN(3)
 }
 def triggerB4(evt) {
-    updatePIN(0)
+    updatePIN(4)
 }
 def triggerB5(evt) {
-    updatePIN(0)
+    updatePIN(5)
 }
 def triggerB6(evt) {
-    updatePIN(0)
+    updatePIN(6)
 }
 def triggerB7(evt) {
-    updatePIN(0)
+    updatePIN(7)
 }
 def triggerB8(evt) {
-    updatePIN(0)
+    updatePIN(8)
 }
 def triggerB9(evt) {
-    updatePIN(0)
+    updatePIN(9)
 }
 def triggerBC(evt) {
     resetPIN()
@@ -157,33 +178,46 @@ def updatePIN (numVal) {
             state.pinValue = state.pinValue + numVal
             }
 
-def myPin = "P${pinNum}"
-def myPin2 = "P${pinNum2}"
-def yourPin = state.pinValue
+	def myPin = "P${pinNum}"
+	def myPin2 = "P${pinNum2}"
+	def yourPin = state.pinValue
 
-logWriter ("My PIN is $myPin")
-logWriter ("Your PIN is $yourPin")
+	logWriter ("PIN 1 is $myPin")
+	logWriter ("PIN 2 is $myPin2")
+	logWriter ("Entered PIN is $yourPin")
 
-runIn(5, resetPIN, [overwrite: true])
-if (myPin == yourPin){
-    settings."triggerSW"?.on()
-    resetPIN()
-	logWriter ("UNLOCKED with PIN 1")
+	if (myPin == yourPin){
+    	settings."triggerSW"?.on()
+		ExecRoutine(routine1)
+        logWriter ("UNLOCKED with PIN 1")
+		resetPIN()
+	}
+	else if (myPin2 == yourPin){
+    	settings."triggerSW2"?.on()
+        ExecRoutine(routine2)
+		logWriter ("UNLOCKED with PIN 2")
+		resetPIN()
+	}
+    
+// Reset PIN entry after X seconds
+	runIn(pSecs, resetPIN, [overwrite: true])
+
 }
-if (myPin2 == yourPin){
-    settings."triggerSW2"?.on()
-    resetPIN()
-	logWriter ("UNLOCKED with PIN 2")
-}
-}
+
 
 def resetPIN () {
-state.pinValue = "P"
-logWriter ("PIN Reset")
+	state.pinValue = "P"
+	logWriter ("PIN Reset")
 }
+
 
 private def logWriter(value) {
 	if (state.debugLogging) {
         log.debug "${value}"
     }	
+}
+
+def ExecRoutine(routine) {
+	if(!routine) return
+	location.helloHome?.execute(routine)
 }
