@@ -16,6 +16,7 @@
  * ###############
  *
  *  v0.1 - Quickly pulled together PIN eentry mechanism using virtual switches
+ *  v0.2 - Added dual PINs and triggers
  *
  */
 
@@ -80,15 +81,17 @@ def mainPage() {
             input "b7", "capability.switch", title:"7", multiple: false, required: false
             input "b8", "capability.switch", title:"8", multiple: false, required: false
             input "b9", "capability.switch", title:"9", multiple: false, required: false
-            input "b_Clear", "capability.switch", title:"Momentary switch on Play", multiple: false, required: false            
+            input "b_Clear", "capability.switch", title:"Cancel Button", multiple: false, required: false            
         }
 
 section("Trigger") {
-            input "triggerSW", "capability.switch", title:"Switch to trigger on correct PIN", multiple: false, required: false            
+            input "triggerSW", "capability.switch", title:"Switch to trigger on correct PIN 1", multiple: false, required: false
+            input "triggerSW2", "capability.switch", title:"Switch to trigger on correct PIN 2", multiple: false, required: false
         }
 
 section("PIN") {
-            input(name: "pinNum", type: "text", title: "PIN to trigger switch", required:false)
+            input(name: "pinNum", type: "text", title: "PIN 1 to trigger switch", required:false)
+            input(name: "pinNum2", type: "text", title: "PIN 2 to trigger switch", required:false)
         }
         section(title: "Debug Logging") {
        		paragraph "If you experiencing issues please enable logging to help troubleshoot"
@@ -155,6 +158,7 @@ def updatePIN (numVal) {
             }
 
 def myPin = "P${pinNum}"
+def myPin2 = "P${pinNum2}"
 def yourPin = state.pinValue
 
 logWriter ("My PIN is $myPin")
@@ -164,7 +168,12 @@ runIn(5, resetPIN, [overwrite: true])
 if (myPin == yourPin){
     settings."triggerSW"?.on()
     resetPIN()
-logWriter ("UNLOCKED")
+	logWriter ("UNLOCKED with PIN 1")
+}
+if (myPin2 == yourPin){
+    settings."triggerSW2"?.on()
+    resetPIN()
+	logWriter ("UNLOCKED with PIN 2")
 }
 }
 
