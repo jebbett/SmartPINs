@@ -27,9 +27,9 @@ definition(
     author: "Jake Tebbett",
     description: "Smart PIN entry for SmartTiles",
     category: "My Apps",
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
-    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+    iconUrl: "https://raw.githubusercontent.com/jebbett/SmartPINs/master/Resources/SmartPINs.png",
+    iconX2Url: "https://raw.githubusercontent.com/jebbett/SmartPINs/master/Resources/SmartPINs.png",
+    iconX3Url: "https://raw.githubusercontent.com/jebbett/SmartPINs/master/Resources/SmartPINs.png")
 
 
 preferences {
