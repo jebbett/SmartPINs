@@ -19,6 +19,7 @@
  *  v0.2 - Added dual PINs and triggers
  *  v0.3 - Fixed major error, added routines and custom seconds before reset
  *  v0.4 - Added advanced option to require "Enter" button to be pressed to confirm PIN for additional security (optional)
+ *  v0.5 - Bug fix from last change.
  *
  */
 
@@ -62,8 +63,8 @@ def initialize() {
     subscribe(b7, "switch.on", triggerB7)
     subscribe(b8, "switch.on", triggerB8)
     subscribe(b9, "switch.on", triggerB9)
-    subscribe(b_Clear, "switch", triggerBC)
-    subscribe(b_Enter, "switch", triggerBE)
+    subscribe(b_Clear, "switch.on", triggerBC)
+    subscribe(b_Enter, "switch.on", triggerBE)
     state.pinValue = "P"
     log.debug "Installed with settings: ${settings}"
 }
@@ -125,12 +126,10 @@ def mainPage() {
             	
             if (debugLogging) { 
             	state.debugLogging = true 
-                logWriter("Debug Logging has been ${state.debugLogging.toString().toUpperCase()}")
-                paragraph "Debug Logging is Enabled: ${state.debugLogging}"
+                logWriter("Debug Logging is ${state.debugLogging.toString().toUpperCase()}")
             }
             else { 
-            	state.debugLogging = false 
-            	logWriter("Debug Logging has been ${state.debugLogging.toString().toUpperCase()}")    
+            	state.debugLogging = false     
             }
     	}
 
@@ -185,11 +184,6 @@ def updatePIN (numVal) {
     {
        	state.pinValue = state.pinValue + numVal
     }
-
-	def myPin = "P${pinNum}"
-	def myPin2 = "P${pinNum2}"
-	def yourPin = state.pinValue
-	logWriter ("Entered PIN is $yourPin")
     
 	// Reset PIN entry after X seconds
 	runIn(pSecs, resetPIN, [overwrite: true])
@@ -202,7 +196,16 @@ def updatePIN (numVal) {
 
 def checkPIN () {
 
+	def myPin = "P${pinNum}"
+	def myPin2 = "P${pinNum2}"
+	def yourPin = state.pinValue
+    
+	logWriter ("Entered PIN is $yourPin")
+	logWriter ("PIN1 is $myPin")
+    logWriter ("PIN2 is $myPin2")
+
 	if (myPin == yourPin){
+    
     	settings."triggerSW"?.on()
 		ExecRoutine(routine1)
         logWriter ("UNLOCKED with PIN 1")
@@ -219,7 +222,8 @@ def checkPIN () {
 
 def resetPIN () {
 	state.pinValue = "P"
-	logWriter ("PIN Reset")
+    logWriter ("PIN Reset")
+    
 }
 
 
