@@ -20,6 +20,7 @@
  *  v0.3 - Fixed major error, added routines and custom seconds before reset
  *  v0.4 - Added advanced option to require "Enter" button to be pressed to confirm PIN for additional security (optional)
  *  v0.5 - Bug fix from last change.
+ *  v0.6 - Timer reset on clear and successful PIN
  *
  */
 
@@ -29,7 +30,7 @@ definition(
     name: "SmartPINs",
     namespace: "jebbett",
     author: "Jake Tebbett",
-    description: "Smart PIN entry for SmartTiles",
+    description: "PIN entry for SmartTiles",
     category: "My Apps",
     iconUrl: "https://raw.githubusercontent.com/jebbett/SmartPINs/master/Resources/SmartPINs.png",
     iconX2Url: "https://raw.githubusercontent.com/jebbett/SmartPINs/master/Resources/SmartPINs.png",
@@ -177,6 +178,7 @@ def triggerBE(evt) {
 
 def updatePIN (numVal) {
    
+    // Just in case PIN does not have P prefix
     if (state.pinValue == null) {
 				resetPIN()
     }
@@ -187,7 +189,8 @@ def updatePIN (numVal) {
     
 	// Reset PIN entry after X seconds
 	runIn(pSecs, resetPIN, [overwrite: true])
-
+    
+	//Check PIN if Enter not required
 	if (reqEnter == false) {
     	checkPIN()
     }
@@ -204,6 +207,7 @@ def checkPIN () {
 	logWriter ("PIN1 is $myPin")
     logWriter ("PIN2 is $myPin2")
 
+	//Check if match against either specified correct PIN
 	if (myPin == yourPin){
     
     	settings."triggerSW"?.on()
@@ -217,12 +221,17 @@ def checkPIN () {
 		logWriter ("UNLOCKED with PIN 2")
 		resetPIN()
 	}
+    else
+    {
+    	logWriter ("No matching PIN")
+    }
 }
 
 
 def resetPIN () {
 	state.pinValue = "P"
     logWriter ("PIN Reset")
+    unschedule("resetPIN")
     
 }
 
