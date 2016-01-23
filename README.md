@@ -9,10 +9,10 @@ For use with SmartTiles - Use momentary switches / tiles to provide a method of 
 PLEASE NOTE:
 - PINs are stored in plain text
 - You should not use your bank or phone PIN!
-- Can be read from the app (although your security can be bypassed here too)
-- Can be read from IDE
+- Stored PINs can be read from the app (although your security can probably be bypassed here too)
+- Stored PINs san be read from IDE
 
-However most criminals breaking in to your house are unlikely to be the most intelligent of beings, and this 
+However most criminals breaking in to your house are unlikely to be the most intelligent of beings to bypass this and it’s strongly suggested that the smart things App is not installed on the device you are using to present SmartTiles. 
 
 ## Installation Instructions
 
@@ -42,4 +42,3 @@ a. Add the switches as “Momentary Switches” to your desired SmartTiles Dash.
 ![](https://raw.githubusercontent.com/jebbett/SmartPINs/master/Resources/PINPad.PNG)
 
  
-
